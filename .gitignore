@@ -1,0 +1,15 @@
+
+__pycache__/
+.pytest_cache
+
+currency_exchange_data/
+
+# VS Code (TEMPORARILY DISABLE)
+.vscode/tasks.json
+.vscode/launch.json
+
+# VS Code
+Scrapbook*.mongo
+
+
+*.log
