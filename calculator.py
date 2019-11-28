@@ -3,12 +3,13 @@ import consts
 import helper
 import mongodb_handler
 import time
+import file_handler
 
 def rate_converter(code,instance):
     base = instance[code]
     rate = {}
     for key in instance:
-        rate[key] = round(instance[key]/base,5)
+        rate[key] = round(instance[key]/base,6)
     return rate;
 
 def all_rates():
@@ -28,3 +29,4 @@ if __name__=='__main__':
         db = mongodb_handler.db('currency_database',code)
         if not db.getOne('date',fetch_time):
             db.addOne(rates[code])
+        file_handler.outputToFile(code,rates[code])        
