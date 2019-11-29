@@ -1,4 +1,4 @@
-import consts
+from info import consts
 import time
 
 class validate:

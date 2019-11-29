@@ -1,9 +1,10 @@
-import fetcher
-import consts
-import helper
-import mongodb_handler
+
 import time
-import file_handler
+
+from info import consts
+from info import helper
+from util import mongodb_handler
+from util import file_handler
 
 def rate_converter(code,instance):
     base = instance[code]
@@ -12,9 +13,8 @@ def rate_converter(code,instance):
         rate[key] = round(instance[key]/base,6)
     return rate;
 
-def all_rates():
+def all_rates(data):
     rate = {}
-    data = fetcher.instance()
     instance = data['rates']
     for code in consts.all_codes:
         rate[code] = helper.ref().code(code)
@@ -22,8 +22,7 @@ def all_rates():
         rate[code]['rates'] = rate_converter(code,instance)
     return rate
 
-if __name__=='__main__':
-    rates = all_rates()
+def storeData(rates):
     fetch_time = time.strftime("%Y-%m-%d", time.localtime())
     for code in rates:
         db = mongodb_handler.db('currency_database',code)

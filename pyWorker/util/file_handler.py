@@ -1,8 +1,10 @@
 import os
 import time
+import logging as logger
 
 def newpath(path):
     if not os.path.exists(path):
+        logger.info('make new directory')
         os.makedirs(path)
 
 def outputToFile(name,data, path = "currency_exchange_data"):
