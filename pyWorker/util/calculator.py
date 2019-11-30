@@ -1,5 +1,6 @@
 
 import time
+import logging as logger
 
 from info import consts
 from info import helper
@@ -22,10 +23,22 @@ def all_rates(data):
         rate[code]['rates'] = rate_converter(code,instance)
     return rate
 
+def to_mongodb(collection,time,instance):
+    try:
+        db = mongodb_handler.db('currency_database',collection)
+        if not db.getOne('date',time):
+            db.addOne(instance)
+    except:
+        logger.warn('insert ' +collection+' into database failed!')
+
+def to_file(code, instance):
+    try:
+        file_handler.outputToFile(code,instance)  
+    except:
+        logger.warn('insert ' +collection+' data into files failed!')
+
 def storeData(rates):
     fetch_time = time.strftime("%Y-%m-%d", time.localtime())
     for code in rates:
-        db = mongodb_handler.db('currency_database',code)
-        if not db.getOne('date',fetch_time):
-            db.addOne(rates[code])
-        file_handler.outputToFile(code,rates[code])        
+        to_file(code,rates[code])
+        to_mongodb(code,fetch_time,rates[code])  
