@@ -7,7 +7,7 @@ def newpath(path):
         logger.info('make new directory')
         os.makedirs(path)
 
-def outputToFile(name,data, path = "currency_exchange_data"):
+def outputToFile(name,data,path):
     newpath(path)
     date = time.strftime("%Y-%m-%d", time.localtime())
     datepath=(path+'\\'+date)
@@ -21,3 +21,15 @@ def outputToFile(name,data, path = "currency_exchange_data"):
                 f.write(str(key)+':\n')
                 for code in data[key]:
                     f.write('\t'+str(code)+': '+str(data[key][code])+'\n')
+
+def getRate(name,path):
+    instance = {}
+    path = path+'\\'+name+'.data'
+    with open(path,'r') as f:
+        text = f.readlines()
+        text = text[5:]
+        for line in text:
+            line = line.replace('\n','').replace('\t','').replace(' ','')
+            (key,value) = line.split(':')
+            instance[key]=value
+    return instance
