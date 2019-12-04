@@ -7,9 +7,8 @@ def newpath(path):
         logger.info('make new directory')
         os.makedirs(path)
 
-def outputToFile(name,data,path):
+def outputToFile(name,data,path,date):
     newpath(path)
-    date = time.strftime("%Y-%m-%d", time.localtime())
     datepath=(path+'\\'+date)
     newpath(datepath)
     filepath = datepath+'\\'+name+'.data'

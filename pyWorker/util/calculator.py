@@ -33,9 +33,9 @@ def to_mongodb(collection,time,instance):
     except:
         logger.warn('insert ' +collection+' into database failed!')
 
-def to_file(path,code, instance):
+def to_file(path,code,instance,date=time.strftime("%Y-%m-%d", time.localtime())):
     try:
-        file_handler.outputToFile(code,instance,path)  
+        file_handler.outputToFile(code,instance,path,date)  
     except:
         logger.warn('insert ' +collection+' data into files failed!')
 
@@ -70,8 +70,15 @@ def processData(rates,path):
     rate_in_db = {}
     for code in consts.all_codes:
         print(code)
-        print(rateInFile(code,path) is rateInDB(code))
-        print()
+        fileData = rateInFile(code,path)
+        dbData = rateInDB(code)
+        if fileData is not dbData:
+            for instance in fileData:
+                if instance not in dbData:
+                    to_mongodb(code,instance['date'],instance)
+            for instance in dbData:
+                if instance not in fileData:
+                    to_file(path,code,instance,instance['date'])
 
 def storeData(rates,path):
     fetch_time = time.strftime("%Y-%m-%d", time.localtime())
