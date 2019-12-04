@@ -69,7 +69,6 @@ def processData(rates,path):
     rate_in_file = {}
     rate_in_db = {}
     for code in consts.all_codes:
-        print(code)
         fileData = rateInFile(code,path)
         dbData = rateInDB(code)
         if fileData is not dbData:
