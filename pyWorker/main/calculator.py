@@ -17,6 +17,7 @@ def rate_converter(code,instance):
     return rate;
 
 def all_rates(data):
+
     rate = {}
     instance = data['rates']
     for code in consts.all_codes:

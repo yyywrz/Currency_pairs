@@ -7,10 +7,10 @@ from taskflow import task
 import logging as logger
 
 from fetcher import fetcher
-from util import calculator
+from main import calculator
 
 def initlog():
-    path = root_path()+'temp//log'
+    path = root_path()+'//temp//log'
     try:
         os.makedirs(path)
     except FileExistsError:
@@ -58,7 +58,7 @@ class storeData(task.Task):
 if __name__=='__main__':
     initlog()
     logger.info("---START PYWORKER---")
-    wf = linear_flow.Flow("pass-from-to")
+    wf = linear_flow.Flow("main-flow")
     wf.add(
         fetchData('fetch data'),
         calculateRates('calculate rates'),
@@ -67,10 +67,8 @@ if __name__=='__main__':
     e = engines.load(wf)
     try:
         e.run()
-        logger.info("---PYWORKER SLEEP---")
     except KeyboardInterrupt:
         pass
-    finally:
-        exc_info = sys.exc_info()
-        logger.critical(exc_info)
+    except err as e:
+        logger.critical(e)
     logger.info("---PYWORKER EXIT---")

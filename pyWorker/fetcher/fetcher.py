@@ -3,6 +3,9 @@ from info import consts
 import logging as logger
 
 def fetcher(currency_code):
+# """
+# requst currency exchange rate data, it returns a JSON dict
+# """
     url = 'https://api.exchangerate-api.com/v4/latest/'+ currency_code;
     try:
         logger.info('request exchange rate data of ' +currency_code)
@@ -15,6 +18,10 @@ def fetcher(currency_code):
     return data
 
 def instance():
+# """
+# in case of some unexpecting request failure, it will try all codes.
+# it ends once a instance available
+# """
     for base in consts.all_codes:
         data = fetcher(base)
         if data:
