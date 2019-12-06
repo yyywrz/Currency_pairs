@@ -1,0 +1,57 @@
+Currency Code: ILS
+Currency Name: Israeli Shekel
+Region: Israel
+date: 2019-12-06
+rates:
+	IDR: 4000.0
+	AED: 1.108
+	ARS: 18.032
+	AUD: 0.42
+	BGN: 0.5
+	BRL: 1.208
+	BSD: 0.3
+	CAD: 0.38
+	CHF: 0.284
+	CLP: 231.428
+	CNY: 2.028
+	COP: 1043.48
+	CZK: 6.636
+	DKK: 1.94
+	DOP: 15.948
+	EGP: 4.852
+	EUR: 0.26
+	FJD: 0.656
+	GBP: 0.22
+	GTQ: 2.316
+	HKD: 2.252
+	HRK: 1.908
+	HUF: 86.044
+	ILS: 1.0
+	INR: 20.516
+	ISK: 34.948
+	JPY: 31.304
+	KRW: 342.384
+	KZT: 116.504
+	MXN: 5.58
+	MYR: 1.2
+	NOK: 2.632
+	NZD: 0.44
+	PAB: 0.3
+	PEN: 0.988
+	PHP: 14.664
+	PKR: 46.6
+	PLN: 1.112
+	PYG: 2000.0
+	RON: 1.24
+	RUB: 18.356
+	SAR: 1.096
+	SEK: 2.732
+	SGD: 0.392
+	THB: 8.728
+	TRY: 1.656
+	TWD: 8.924
+	UAH: 6.972
+	USD: 0.288
+	UYU: 11.38
+	VND: 6596.492
+	ZAR: 4.212
