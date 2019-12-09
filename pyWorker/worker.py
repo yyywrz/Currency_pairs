@@ -8,9 +8,14 @@ import logging as logger
 
 from fetcher import fetcher
 from main import calculator
+from util import path_helper
+
+pyworker = path_helper.parent_path(path_helper.current_path(__file__))
+root = path_helper.grandparent_path(path_helper.current_path(__file__))
+dataFile_path = root + "//currency_exchange_data"
 
 def initlog():
-    path = root_path()+'//temp//log'
+    path = root +'//temp//log'
     try:
         os.makedirs(path)
     except FileExistsError:
@@ -21,14 +26,16 @@ def initlog():
                     format='%(asctime)s - %(levelname)s: %(message)s - %(pathname)s[line:%(lineno)d] '
                     )
 
-def root_path():
-    current_path = os.path.abspath(__file__)
-    pyworker = os.path.abspath(os.path.dirname(current_path) + os.path.sep + ".")
-    root = os.path.abspath(os.path.dirname(pyworker) + os.path.sep + ".")
-    return root.replace('\\','//')
-
-def dataFile_path():
-    return root_path()+"//currency_exchange_data"
+def add_lib_path():
+    for path in sys.path:
+        if path_helper.file_name(path) == 'site-packages':
+            pth_file = path+'\\currency_pair.pth'
+            if not os.path.exists(pth_file):
+                with open(pth_file,'w') as f:
+                    f.write(pyworker)
+                    logger.info("Add pyworker in system path")
+            else:
+                logger.info("Pyworker already in system path")
 
 class fetchData(task.Task):
     default_provides = 'instance'
@@ -52,11 +59,12 @@ class calculateRates(task.Task):
 class storeData(task.Task):
     def execute(self, rates):
         logger.info("Executing '%s'" % (self.name))
-        calculator.processData(rates,dataFile_path())
+        calculator.processData(rates,dataFile_path)
 
 
 if __name__=='__main__':
     initlog()
+    add_lib_path()
     logger.info("---START PYWORKER---")
     wf = linear_flow.Flow("main-flow")
     wf.add(

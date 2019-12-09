@@ -1,7 +1,12 @@
 from info import consts
 import time
+from copy import deepcopy
 
 class validate:
+#
+# It verifys the currency code names, region names, and currency names.
+# just return True/False
+#
     def __init__(self):
         self.regions = set()
         self.currency_names = set()
@@ -22,6 +27,10 @@ class validate:
 
 
 class ref:
+#
+# Based on the input reference, it gives a data instance.
+# Example : {'Currency Code': 'CNY', 'Currency Name': 'Chinese Renminbi', 'Region': 'China'} 
+#
     def __init__(self):
         self.vali = validate()
         self.codes={}
@@ -31,10 +40,6 @@ class ref:
             self.codes[instance['Currency Code']] = instance
             self.currency_names[instance['Currency Name']] = instance
             self.regions[instance['Region']] = instance
-            if instance['Region'] == 'Europe':
-                for country in consts.Europe:
-                    instance['Region'] = country
-                    self.regions[country] = instance
     
     def code(self,code):
         if self.vali.code(code):
@@ -44,6 +49,10 @@ class ref:
     
     def region(self,region):
         if self.vali.region(region):
+            if region in consts.Europe:
+                instance = deepcopy(self.regions['Europe'])
+                instance['Region'] = region
+                return instance
             return self.regions[region]
         else:
             return 'invalid'
@@ -55,18 +64,3 @@ class ref:
             return 'invalid'
 
 
-if __name__=='__main__':
-    k = validate()
-    print(k.code('CNY'))
-    print(k.region('China'))
-    print(k.region('Japan'))
-    print(k.currency_name('US Dollar'))
-    p = ref()
-    print(p.code('CNY'))
-    print(p.region('China'))
-    print(p.region('Japan'))
-    print(p.currency_name('US Dollar'))
-    print(p.code('CNY1'))
-    print(p.region('Chi2134na'))
-    print(p.region('Japa234n'))
-    print(p.currency_name('US Dol34lar'))

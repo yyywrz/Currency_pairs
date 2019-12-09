@@ -32,13 +32,13 @@ def to_mongodb(collection,time,instance):
         if not db.getOne('date',time):
             db.addOne(instance)
     except:
-        logger.warn('insert ' +collection+' into database failed!')
+        logger.warning('insert ' +collection+' into database failed!')
 
 def to_file(path,code,instance,date=time.strftime("%Y-%m-%d", time.localtime())):
     try:
         file_handler.outputToFile(code,instance,path,date)  
     except:
-        logger.warn('insert ' +collection+' data into files failed!')
+        logger.warning('insert ' +collection+' data into files failed!')
 
 def one_date_instance_in_file(code,path,base,date):
     target_path = path+'//'+date
