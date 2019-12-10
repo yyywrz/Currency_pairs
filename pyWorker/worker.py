@@ -100,7 +100,11 @@ if __name__=='__main__':
         e = engines.load(wf)
     else:
         for term in sys.argv[1:]:
-            [key,value] = term.split(':')
+            try:
+                [key,value] = term.split(':')
+            except:
+                logger.critical('Invalid arguments')
+                sys.exit()
             if key == 'date':
                 wf = linear_flow.Flow("main-flow")
                 wf.add(
@@ -132,4 +136,6 @@ if __name__=='__main__':
         e.run()
     except KeyboardInterrupt:
         pass
+    except TypeError as t:
+        logger.critical('Ileagal input')
     logger.info("---PYWORKER EXIT---")
