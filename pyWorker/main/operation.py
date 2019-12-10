@@ -105,7 +105,7 @@ def removeDataInDB(date):
 def remove_all(path):
     for date in os.listdir(path):
         file_handler.removeDataInFile(date,path)
-    for code in consts.all_code:
+    for code in consts.all_codes:
         try:
             db = mongodb_handler.db('currency_database',code)
             db.removeAll()
