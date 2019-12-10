@@ -32,3 +32,19 @@ def getRate(name,path):
             (key,value) = line.split(':')
             instance[key]=value
     return instance
+
+def removeDataInFile(date,path):
+    if date in os.listdir(path):
+        path = path +'\\'+date
+        for x in os.listdir(path):
+            try:
+                os.remove(path+'\\'+x)
+            except OSError as e:
+                logger.error('delete '+path+'\\'+x+' failed')
+        try:
+            os.rmdir(path)
+            logger.info('delete '+path+' successfully')
+        except OSError as e:
+            logger.error('delete '+path+' failed')
+    else:
+        logger.error('deletion failed, '+date+' does not exsit!')
