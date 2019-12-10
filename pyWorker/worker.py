@@ -86,6 +86,36 @@ class rebaseData(task.Task):
         logger.info("Executing  '%s'" % (self.name))
         operation.rebaseData(dataFile_path, base)
 
+class getDateRange(task.Task):
+    default_provides = 'dateRange'
+    def execute(self, start, end):
+        logger.info("Executing '%s'" % (self.name))
+        try:
+            dr = datetime_helper.dateRange(start,end)
+        except:
+            raise TypeError("instance needed!")
+        return dr
+
+class processDaterangeData(task.Task):
+    def execute(self, dateRange):
+        for date in dateRange:
+            wf = linear_flow.Flow("sub-flow"+date)
+            wf.add(
+                fetchHistoricalData('fetch data'),
+                calculateRates('calculate rates'),
+                storeData('store data')
+            )
+            e = engines.load(wf,store={'date':date})
+            runEngine(e)
+
+def runEngine(eng):
+    try:
+        eng.run()
+    except KeyboardInterrupt:
+        pass
+    except TypeError as t:
+        logger.critical('Ileagal input')
+
 if __name__=='__main__':
     initlog()
     add_lib_path()
@@ -113,6 +143,7 @@ if __name__=='__main__':
                     storeData('store data')
                 )
                 e = engines.load(wf,store={key:value})
+                runEngine(e)
                 break
             elif key == 'remove':
                 wf = linear_flow.Flow("main-flow")
@@ -120,6 +151,7 @@ if __name__=='__main__':
                     cleanData('remove data')
                 )
                 e = engines.load(wf,store={'date':value})
+                runEngine(e)
                 break
             elif key == 'rebase':
                 if value not in ['file','db']:
@@ -130,12 +162,21 @@ if __name__=='__main__':
                     rebaseData('rebase data')
                 )
                 e = engines.load(wf,store={'base':value})
+                runEngine(e)
                 break
-
-    try:
-        e.run()
-    except KeyboardInterrupt:
-        pass
-    except TypeError as t:
-        logger.critical('Ileagal input')
+            elif key == 'period':
+                try:
+                    print(value)
+                    [start,end] = value.split(',')
+                    
+                except:
+                    sys.exit()
+                    logger.critical('Invalid arguments')
+                wf = linear_flow.Flow("main-flow")
+                wf.add(
+                    getDateRange('get date range'),
+                    processDaterangeData('process date-range data')
+                )
+                e = engines.load(wf,store={'start':start,'end':end})
+                runEngine(e)
     logger.info("---PYWORKER EXIT---")
