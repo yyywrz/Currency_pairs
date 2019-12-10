@@ -10,6 +10,7 @@ from fetcher import fetcher
 from main import operation
 from util import path_helper
 from util import file_handler
+from util import datetime_helper
 
 pyworker = path_helper.parent_path(path_helper.current_path(__file__))
 root = path_helper.grandparent_path(path_helper.current_path(__file__))
@@ -121,7 +122,7 @@ if __name__=='__main__':
     add_lib_path()
     logger.info("---START PYWORKER---")
     if len(sys.argv) == 1:
-        wf = linear_flow.Flow("main-flow")
+        wf = linear_flow.Flow("main-flow-fetch-new")
         wf.add(
             fetchData('fetch data'),
             calculateRates('calculate rates'),
@@ -136,7 +137,7 @@ if __name__=='__main__':
                 logger.critical('Invalid arguments')
                 sys.exit()
             if key == 'date':
-                wf = linear_flow.Flow("main-flow")
+                wf = linear_flow.Flow("sub-flow-add-historical-data")
                 wf.add(
                     fetchHistoricalData('fetch data'),
                     calculateRates('calculate rates'),
@@ -146,7 +147,7 @@ if __name__=='__main__':
                 runEngine(e)
                 break
             elif key == 'remove':
-                wf = linear_flow.Flow("main-flow")
+                wf = linear_flow.Flow("sub-flow-remove")
                 wf.add(
                     cleanData('remove data')
                 )
@@ -157,7 +158,7 @@ if __name__=='__main__':
                 if value not in ['file','db']:
                     logger.error('[rebase:Object] Object must be either "db" or "file"!')
                     sys.exit()
-                wf = linear_flow.Flow("main-flow")
+                wf = linear_flow.Flow("sub-flow-rebase")
                 wf.add(
                     rebaseData('rebase data')
                 )
@@ -168,10 +169,9 @@ if __name__=='__main__':
                 try:
                     print(value)
                     [start,end] = value.split(',')
-                    
                 except:
-                    sys.exit()
                     logger.critical('Invalid arguments')
+                    sys.exit()
                 wf = linear_flow.Flow("main-flow")
                 wf.add(
                     getDateRange('get date range'),

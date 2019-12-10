@@ -64,8 +64,9 @@ def rateInDB(collection):
     db = mongodb_handler.db('currency_database',collection)
     instance=[]
     for one_date_instance in db.all():
-        del one_date_instance['_id']
-        instance.append(copy.deepcopy(one_date_instance))
+        one = copy.deepcopy(one_date_instance)
+        del one['_id']
+        instance.append(one)
     return instance
 
 def rebaseData(path,base):
