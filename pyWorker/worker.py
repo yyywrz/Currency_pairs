@@ -129,6 +129,7 @@ if __name__=='__main__':
             storeData('store data')
         )
         e = engines.load(wf)
+        runEngine(e)
     else:
         for term in sys.argv[1:]:
             try:

@@ -1,6 +1,7 @@
 import os
 import time
 import logging as logger
+from info import consts
 
 keys=['Currency Code', 'Currency Name', 'Region', 'date']
 
@@ -18,7 +19,7 @@ def outputToFile(name,data,path,date):
         for key in data:
             if key in keys:
                 f.write(str(key)+': '+str(data[key])+'\n')
-            else:
+            elif key == 'rates':
                 f.write(str(key)+':\n')
                 for code in data[key]:
                     f.write('\t'+str(code)+': '+str(data[key][code])+'\n')
@@ -28,11 +29,12 @@ def getRate(name,path):
     path = path+'\\'+name+'.data'
     with open(path,'r') as f:
         text = f.readlines()
-        text = text[5:]
         for line in text:
-            line = line.replace('\n','').replace('\t','').replace(' ','')
-            (key,value) = line.split(':')
-            instance[key]=value
+            if line.startswith('\t'):
+                line = line.replace('\n','').replace('\t','').replace(' ','')
+                (key,value) = line.split(':')
+                if key in consts.all_codes:
+                    instance[key]=value
     return instance
 
 def removeDataInFile(date,path):
