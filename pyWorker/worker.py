@@ -168,7 +168,6 @@ if __name__=='__main__':
                 break
             elif key == 'period':
                 try:
-                    print(value)
                     [start,end] = value.split(',')
                 except:
                     logger.critical('Invalid arguments')
@@ -180,4 +179,7 @@ if __name__=='__main__':
                 )
                 e = engines.load(wf,store={'start':start,'end':end})
                 runEngine(e)
+            else:
+                logger.error('Invalid arguments, worker is not generated!')
+                print('Invalid arguments')
     logger.info("---PYWORKER EXIT---")

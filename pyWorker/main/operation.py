@@ -28,6 +28,8 @@ def all_rates(data):
 def to_mongodb(collection,time,instance):
     try:
         db = mongodb_handler.db('currency_database',collection)
+        if '_id' in instance:
+            del instance['_id']
         if not db.getOne('date',time):
             db.addOne(instance)
     except:
