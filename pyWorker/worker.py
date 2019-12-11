@@ -109,9 +109,17 @@ class processDaterangeData(task.Task):
             e = engines.load(wf,store={'date':date})
             runEngine(e)
 
-def runEngine(eng):
+def runEngine(eng,frenquency=0):
     try:
-        eng.run()
+        logger.info("---PYWORKER RUN---")
+        if frenquency:
+            while True:
+                eng.run()
+                logger.info("---PYWORKER SLEEP---")   
+                time.sleep(frenquency)
+                logger.info("---PYWORKER RESUME---")
+        else:
+            eng.run()
     except KeyboardInterrupt:
         pass
     except TypeError as t:
@@ -129,7 +137,7 @@ if __name__=='__main__':
             storeData('store data')
         )
         e = engines.load(wf)
-        runEngine(e)
+        runEngine(e,43200)
     else:
         for term in sys.argv[1:]:
             try:
