@@ -2,9 +2,8 @@
 __pycache__/
 .pytest_cache
 
-# VS Code (TEMPORARILY DISABLE)
-.vscode/tasks.json
-.vscode/launch.json
+# VS Code 
+.vscode/
 
 # VS Code
 Scrapbook*.mongo
