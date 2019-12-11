@@ -2,6 +2,8 @@ import os
 import time
 import logging as logger
 
+keys=['Currency Code', 'Currency Name', 'Region', 'date']
+
 def newpath(path):
     if not os.path.exists(path):
         logger.info('make new directory')
@@ -14,7 +16,7 @@ def outputToFile(name,data,path,date):
     filepath = datepath+'\\'+name+'.data'
     with open(filepath,'w') as f:
         for key in data:
-            if key !='rates':
+            if key in keys:
                 f.write(str(key)+': '+str(data[key])+'\n')
             else:
                 f.write(str(key)+':\n')

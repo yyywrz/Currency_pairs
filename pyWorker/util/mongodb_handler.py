@@ -11,6 +11,8 @@ class db:
         self.collection = Database[collection]
         # name of collection
         # launch database
+        
+        self.allCollections = Database.list_collection_names()
     
     def all(self):
         return self.collection.find()

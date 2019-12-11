@@ -42,19 +42,20 @@ def historical_fetcher(date):
     apikey = '0a1de30b7d7412fc06850856b3e9cf84'
     url = web_link + date + '?access_key=' + apikey
     try:
-        logger.info('request historical exchange rate data')
+        logger.info('request historical exchange rate data: '+date)
         response = requests.get(url)
-        data = response.json()
-        if 'error' in data:
-            logger.warning('request failed: '+ data['error']['info'])
+        res = response.json()
+        if 'error' in res:
+            logger.warning('request failed: '+ res['error']['info'])
             return False
         rates = {}
-        for key in data['rates']:
+        data = {}
+        for key in res['rates']:
             if key in consts.all_codes:
-                rates[key] = data['rates'][key]
+                rates[key] = res['rates'][key]
         data['rates'] = rates
+        data['date'] = res['date']
         logger.info('successfully recieve rate data')
-
     except:
         logger.warning('request failed')
         data = False    
@@ -62,4 +63,4 @@ def historical_fetcher(date):
 
 if '__main__'==__name__:
     print(fetcher('USD'))
-    print(historical_fetcher('2019-12-2'))
+    print(historical_fetcher('2019-01-02'))

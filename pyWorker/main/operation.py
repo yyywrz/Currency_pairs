@@ -51,6 +51,8 @@ def one_date_instance_in_file(code,path,base,date):
     return data
 
 def rateInFile(code,path):
+    if not os.path.exists(path):
+        return []
     dates = os.listdir(path)
     instance = []
     base=helper.ref().code(code)
