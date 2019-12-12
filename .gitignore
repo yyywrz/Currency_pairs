@@ -8,5 +8,6 @@ __pycache__/
 # VS Code
 Scrapbook*.mongo
 
+/node_modules
 
 *.log
