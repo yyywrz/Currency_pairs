@@ -8,6 +8,8 @@ import logging as logger
 
 from fetcher import fetcher
 from main import operation
+from fetcher import task_flow as fetcher_tf
+from main import task_flow as operation_tf
 from util import path_helper
 from util import file_handler
 from util import datetime_helper
@@ -109,6 +111,17 @@ class processDaterangeData(task.Task):
             e = engines.load(wf,store={'date':date})
             runEngine(e)
 
+def main_flow():
+    store = {'datafile_path':dataFile_path}
+    (flow,store) = fetcher_tf.fetcher_flow('current_data', store=store)
+    (flow,store) = operation_tf.calculate_rates_flow(flow, store)
+    (flow,store) = operation_tf.store_data_flow(flow, store)
+    e = engines.load(flow,store=store)
+    runEngine(e,43200)
+
+def sub_flow():
+    pass
+
 def runEngine(eng,frenquency=0):
     try:
         logger.info("---PYWORKER RUN---")
@@ -130,15 +143,9 @@ if __name__=='__main__':
     add_lib_path()
     logger.info("---START PYWORKER---")
     if len(sys.argv) == 1:
-        wf = linear_flow.Flow("main-flow-fetch-new")
-        wf.add(
-            fetchData('fetch data'),
-            calculateRates('calculate rates'),
-            storeData('store data')
-        )
-        e = engines.load(wf)
-        runEngine(e,43200)
+        main_flow()
     else:
+        sub_flow()
         for term in sys.argv[1:]:
             try:
                 [key,value] = term.split(':')
@@ -146,15 +153,19 @@ if __name__=='__main__':
                 logger.critical('Invalid arguments')
                 sys.exit()
             if key == 'date':
-                wf = linear_flow.Flow("sub-flow-add-historical-data")
-                wf.add(
-                    fetchHistoricalData('fetch data'),
-                    calculateRates('calculate rates'),
-                    storeData('store data')
-                )
-                e = engines.load(wf,store={key:value})
+                store = {
+                    'datafile_path':dataFile_path,
+                    key:value
+                }
+                (flow,store) = fetcher_tf.fetcher_flow(
+                    'historical_data',
+                    store=store,
+                    date=value
+                    )
+                (flow,store) = operation_tf.calculate_rates_flow(flow, store)
+                (flow,store) = operation_tf.store_data_flow(flow, store)
+                e = engines.load(flow,store=store)
                 runEngine(e)
-                break
             elif key == 'remove':
                 wf = linear_flow.Flow("sub-flow-remove")
                 wf.add(
@@ -162,7 +173,6 @@ if __name__=='__main__':
                 )
                 e = engines.load(wf,store={'date':value})
                 runEngine(e)
-                break
             elif key == 'rebase':
                 if value not in ['file','db']:
                     logger.error('[rebase:Object] Object must be either "db" or "file"!')
@@ -173,7 +183,6 @@ if __name__=='__main__':
                 )
                 e = engines.load(wf,store={'base':value})
                 runEngine(e)
-                break
             elif key == 'period':
                 try:
                     [start,end] = value.split(',')

@@ -39,7 +39,7 @@ def to_file(path,code,instance,date=time.strftime("%Y-%m-%d", time.localtime()))
     try:
         file_handler.outputToFile(code,instance,path,date)  
     except:
-        logger.warning('insert ' +collection+' data into files failed!')
+        logger.warning('insert '+code+date+' data into files failed!',)
 
 def one_date_instance_in_file(code,path,base,date):
     target_path = path+'\\'+date
