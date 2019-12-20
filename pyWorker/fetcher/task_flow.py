@@ -20,7 +20,7 @@ def fetcher_flow(opt, store={}, date=''):
     if opt == 'historical_data':
         flow = linear_flow.Flow('sub_flow_add_historical_data_for_'+date)
         flow.add(
-            fetchHistoricalData('fetch historical exchange rates',
+            fetchHistoricalData('fetch historical exchange rates for '+date,
             rebind={'date':'date'},
             provides = 'one_rate_instance'))
         store['date'] = date

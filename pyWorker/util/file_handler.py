@@ -38,6 +38,7 @@ def getRate(name,path):
     return instance
 
 def removeDataInFile(date,path):
+    # we use 'date' as file name
     if date in os.listdir(path):
         path = path +'\\'+date
         for x in os.listdir(path):

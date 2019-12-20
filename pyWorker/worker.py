@@ -120,7 +120,59 @@ def main_flow():
     runEngine(e,43200)
 
 def sub_flow():
-    pass
+    for term in sys.argv[1:]:
+        try:
+            [key,value] = term.split(':')
+        except:
+            logger.critical('Invalid arguments')
+            sys.exit()
+        if key == 'date':
+            store = {
+                'datafile_path':dataFile_path,
+                key:value
+            }
+            (flow,store) = fetcher_tf.fetcher_flow(
+                'historical_data',
+                store=store,
+                date=value
+                )
+            (flow,store) = operation_tf.calculate_rates_flow(flow, store)
+            (flow,store) = operation_tf.store_data_flow(flow, store)
+            e = engines.load(flow,store=store)
+            runEngine(e)
+        elif key == 'remove':
+            wf = linear_flow.Flow("sub-flow-remove")
+            wf.add(
+                cleanData('remove data')
+            )
+            e = engines.load(wf,store={'date':value})
+            runEngine(e)
+        elif key == 'rebase':
+            if value not in ['file','db']:
+                logger.error('[rebase:Object] Object must be either "db" or "file"!')
+                sys.exit()
+            wf = linear_flow.Flow("sub-flow-rebase")
+            wf.add(
+                rebaseData('rebase data')
+            )
+            e = engines.load(wf,store={'base':value})
+            runEngine(e)
+        elif key == 'period':
+            try:
+                [start,end] = value.split(',')
+            except:
+                logger.critical('Invalid arguments')
+                sys.exit()
+            wf = linear_flow.Flow("main-flow")
+            wf.add(
+                getDateRange('get date range'),
+                processDaterangeData('process date-range data')
+            )
+            e = engines.load(wf,store={'start':start,'end':end})
+            runEngine(e)
+        else:
+            logger.error('Invalid arguments, worker is not generated!')
+            print('Invalid arguments')
 
 def runEngine(eng,frenquency=0):
     try:
@@ -146,57 +198,4 @@ if __name__=='__main__':
         main_flow()
     else:
         sub_flow()
-        for term in sys.argv[1:]:
-            try:
-                [key,value] = term.split(':')
-            except:
-                logger.critical('Invalid arguments')
-                sys.exit()
-            if key == 'date':
-                store = {
-                    'datafile_path':dataFile_path,
-                    key:value
-                }
-                (flow,store) = fetcher_tf.fetcher_flow(
-                    'historical_data',
-                    store=store,
-                    date=value
-                    )
-                (flow,store) = operation_tf.calculate_rates_flow(flow, store)
-                (flow,store) = operation_tf.store_data_flow(flow, store)
-                e = engines.load(flow,store=store)
-                runEngine(e)
-            elif key == 'remove':
-                wf = linear_flow.Flow("sub-flow-remove")
-                wf.add(
-                    cleanData('remove data')
-                )
-                e = engines.load(wf,store={'date':value})
-                runEngine(e)
-            elif key == 'rebase':
-                if value not in ['file','db']:
-                    logger.error('[rebase:Object] Object must be either "db" or "file"!')
-                    sys.exit()
-                wf = linear_flow.Flow("sub-flow-rebase")
-                wf.add(
-                    rebaseData('rebase data')
-                )
-                e = engines.load(wf,store={'base':value})
-                runEngine(e)
-            elif key == 'period':
-                try:
-                    [start,end] = value.split(',')
-                except:
-                    logger.critical('Invalid arguments')
-                    sys.exit()
-                wf = linear_flow.Flow("main-flow")
-                wf.add(
-                    getDateRange('get date range'),
-                    processDaterangeData('process date-range data')
-                )
-                e = engines.load(wf,store={'start':start,'end':end})
-                runEngine(e)
-            else:
-                logger.error('Invalid arguments, worker is not generated!')
-                print('Invalid arguments')
     logger.info("---PYWORKER EXIT---")
