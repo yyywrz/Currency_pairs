@@ -159,7 +159,7 @@ def sub_flow():
             runEngine(e)
         elif key == 'period':
             try:
-                [start,end] = value.split(',')
+                [start,end] = value.split('to')
             except:
                 logger.critical('Invalid arguments')
                 sys.exit()

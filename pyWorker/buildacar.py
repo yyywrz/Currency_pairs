@@ -29,6 +29,7 @@ flow123 = lf.Flow('123').add(
     task1('l1'),
     task2('linear2'),
     task3('linear3'),
+    task1('l1')
 )
 flow1234 = uf.Flow('123').add(
     task1('u1'),
@@ -36,7 +37,7 @@ flow1234 = uf.Flow('123').add(
     task3('unordered3'),
     task4('unordered4'),
 )
-flw=flow1234.add(flow123)
+flw=flow123.add(flow1234)
 
 e = engines.load(flw, engine='parallel',
                  max_workers=4)
