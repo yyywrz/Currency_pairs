@@ -15,8 +15,9 @@ class fetchHistoricalData(task.Task):
         instance = fetcher.historical_fetcher(date)
         return instance
 
-def fetcher_flow(opt, store={}, date=''):
+def fetcher_flow(opt, date=''):
 # opt should be either 'historical_data' or 'current_data'
+    store = {}
     if opt == 'historical_data':
         flow = linear_flow.Flow('sub_flow_add_historical_data_for_'+date)
         flow.add(
@@ -30,7 +31,7 @@ def fetcher_flow(opt, store={}, date=''):
             provides = 'one_rate_instance'))
     else:
         return None
-    return flow, store
+    return(flow, store)
 
 if __name__=='__main__':
     (flow, store) = fetcher_flow('current_data')

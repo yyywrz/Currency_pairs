@@ -110,13 +110,18 @@ class processDaterangeData(task.Task):
             )
             e = engines.load(wf,store={'date':date})
             runEngine(e)
+def update_flow(origin,toBeAdded):
+    (flow,store) = origin
+    (flow_toBeAdded,store_toBeAdded) = toBeAdded
+    store.update(store_toBeAdded)
+    return (flow.add(flow_toBeAdded), store)
 
 def main_flow():
-    store = {'datafile_path':dataFile_path}
-    (flow,store) = fetcher_tf.fetcher_flow('current_data', store=store)
-    (flow,store) = operation_tf.calculate_rates_flow(flow, store)
-    (flow,store) = operation_tf.store_data_flow(flow, store)
-    e = engines.load(flow,store=store)
+    (flow,store) = (linear_flow.Flow('main_flow'),{'datafile_path':dataFile_path})
+    (flow,store) = update_flow((flow,store), fetcher_tf.fetcher_flow('current_data'))
+    (flow,store) = update_flow((flow,store), operation_tf.calculate_rates_flow())
+    (flow,store) = update_flow((flow,store), operation_tf.store_data_flow())
+    e = engines.load(flow, store=store)
     runEngine(e,43200)
 
 def sub_flow():
@@ -131,13 +136,18 @@ def sub_flow():
                 'datafile_path':dataFile_path,
                 key:value
             }
-            (flow,store) = fetcher_tf.fetcher_flow(
+            
+            flow = linear_flow.Flow('main_flow')
+            (flow,store) = update_flow((flow,store), fetcher_tf.fetcher_flow(
                 'historical_data',
-                store=store,
                 date=value
-                )
-            (flow,store) = operation_tf.calculate_rates_flow(flow, store)
-            (flow,store) = operation_tf.store_data_flow(flow, store)
+                ))
+            (flow,store) = update_flow(
+                (flow,store),
+                operation_tf.calculate_rates_flow())
+            (flow,store) = update_flow(
+                (flow,store),
+                operation_tf.store_data_flow())
             e = engines.load(flow,store=store)
             runEngine(e)
         elif key == 'remove':
