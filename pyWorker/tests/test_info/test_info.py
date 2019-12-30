@@ -1,5 +1,6 @@
 from info import helper
 
+
 def test_ref():
     test_codes=['CNY','JPY','USD','EUR']
     test_regions=['China','Japan','United States','Spain']

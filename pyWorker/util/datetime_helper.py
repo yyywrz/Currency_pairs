@@ -1,5 +1,6 @@
 import datetime
 
+
 def dateRange(start, end, step=1, format="%Y-%m-%d"):
     strptime, strftime = datetime.datetime.strptime, datetime.datetime.strftime
     days = (strptime(end, format) - strptime(start, format)).days

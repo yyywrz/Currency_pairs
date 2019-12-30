@@ -1,6 +1,9 @@
-import pytest
-from fetcher import fetcher
 from time import gmtime, strftime
+
+import pytest
+
+from fetcher import fetcher
+
 
 def test_fetcher():
     testdata=['USD','CNY']

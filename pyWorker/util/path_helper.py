@@ -1,5 +1,6 @@
 import os
 
+
 def current_path(name):
     return os.path.abspath(name)
 

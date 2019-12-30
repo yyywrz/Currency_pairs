@@ -1,7 +1,10 @@
 import logging as logger
+
+from taskflow import engines, task
 from taskflow.patterns import linear_flow
-from taskflow import task, engines
+
 from fetcher import fetcher
+
 
 class fetchData(task.Task):
     def execute(self):
@@ -15,15 +18,15 @@ class fetchHistoricalData(task.Task):
         instance = fetcher.historical_fetcher(date)
         return instance
 
-def fetcher_flow(opt, date=''):
+def fetcher_flow(opt, date='',rebind={'date':'date'}):
 # opt should be either 'historical_data' or 'current_data'
     store = {}
     if opt == 'historical_data':
         flow = linear_flow.Flow('sub_flow_add_historical_data_for_'+date)
         flow.add(
             fetchHistoricalData('fetch historical exchange rates for '+date,
-            rebind={'date':'date'},
-            provides = 'one_rate_instance'))
+            rebind=rebind,
+            provides = 'one_rate_instance'+date))
         store['date'] = date
     elif opt == 'current_data':
         flow = linear_flow.Flow('main_flow_keep_fetching_current_exchange_rates')

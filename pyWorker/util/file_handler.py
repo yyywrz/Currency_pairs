@@ -1,14 +1,15 @@
+import logging as logger
 import os
 import time
-import logging as logger
+
 from info import consts
 
 keys=['Currency Code', 'Currency Name', 'Region', 'date']
 
 def newpath(path):
     if not os.path.exists(path):
-        logger.info('make new directory')
-        os.makedirs(path)
+        logger.info('make new directory:'+path)
+        os.makedirs(path, exist_ok=True)
 
 def outputToFile(name,data,path,date):
     newpath(path)

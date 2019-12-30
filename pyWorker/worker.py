@@ -1,18 +1,16 @@
+import logging as logger
 import os
 import sys
 import time
-from taskflow import engines
-from taskflow.patterns import linear_flow
-from taskflow import task
-import logging as logger
+
+from taskflow import engines, task
+from taskflow.patterns import linear_flow, unordered_flow
 
 from fetcher import fetcher
-from main import operation
 from fetcher import task_flow as fetcher_tf
+from main import operation
 from main import task_flow as operation_tf
-from util import path_helper
-from util import file_handler
-from util import datetime_helper
+from util import datetime_helper, file_handler, path_helper
 
 pyworker = path_helper.parent_path(path_helper.current_path(__file__))
 root = path_helper.grandparent_path(path_helper.current_path(__file__))
@@ -82,6 +80,7 @@ class cleanData(task.Task):
         else:
             logger.info("Start to '%s' in Files" % (self.name))
             file_handler.removeDataInFile(date, dataFile_path)
+            logger.info("Start to '%s' in DB" % (self.name))
             operation.removeDataInDB(date)
 
 class rebaseData(task.Task):
@@ -124,6 +123,28 @@ def main_flow():
     e = engines.load(flow, store=store)
     runEngine(e,43200)
 
+
+def historical_flow(key,date):
+    store = {
+        'datafile_path': dataFile_path,
+        key: date
+    }
+    flow = linear_flow.Flow('sub_flow_historical')
+    (flow,store) = update_flow(
+        (flow,store), 
+        fetcher_tf.fetcher_flow(
+            'historical_data',
+            date=date,
+            rebind={'date':key}
+        ))
+    (flow,store) = update_flow(
+        (flow,store),
+        operation_tf.calculate_rates_flow(date=date))
+    (flow,store) = update_flow(
+        (flow,store),
+        operation_tf.store_data_flow(date=date))
+    return(flow,store)
+
 def sub_flow():
     for term in sys.argv[1:]:
         try:
@@ -132,30 +153,36 @@ def sub_flow():
             logger.critical('Invalid arguments')
             sys.exit()
         if key == 'date':
-            store = {
-                'datafile_path':dataFile_path,
-                key:value
-            }
-            
-            flow = linear_flow.Flow('main_flow')
-            (flow,store) = update_flow((flow,store), fetcher_tf.fetcher_flow(
-                'historical_data',
-                date=value
-                ))
-            (flow,store) = update_flow(
-                (flow,store),
-                operation_tf.calculate_rates_flow())
-            (flow,store) = update_flow(
-                (flow,store),
-                operation_tf.store_data_flow())
+            (flow,store) = historical_flow(key, value)
             e = engines.load(flow,store=store)
             runEngine(e)
         elif key == 'remove':
-            wf = linear_flow.Flow("sub-flow-remove")
-            wf.add(
-                cleanData('remove data')
-            )
-            e = engines.load(wf,store={'date':value})
+            if 'to' in value:
+                try:
+                    [start,end] = value.split('to')
+                    date_range = datetime_helper.dateRange(start,end)
+                    total_dates = len(date_range) 
+                    logger.info(str(total_dates) + ' dates will be deleted')
+                except:
+                    logger.critical('Invalid arguments')
+                    sys.exit()
+                flow = unordered_flow.Flow("sub-flow-multiple-dates-remove")
+                store = {}
+                index = 0
+                for date in date_range:
+                    index += 1
+                    flow.add(
+                        cleanData('remove '+date+' data',
+                        rebind={'date':'date'+str(index)}))
+                    store['date'+str(index)]=date
+                workers = 20 if total_dates>20 else total_dates
+                e = engines.load(flow, store=store, engine='parallel', max_workers=workers)
+            else:
+                wf = linear_flow.Flow("sub-flow-remove")
+                wf.add(
+                    cleanData('remove data')
+                )
+                e = engines.load(wf,store={'date':value})
             runEngine(e)
         elif key == 'rebase':
             if value not in ['file','db']:
@@ -170,15 +197,21 @@ def sub_flow():
         elif key == 'period':
             try:
                 [start,end] = value.split('to')
+                date_range = datetime_helper.dateRange(start,end)
+                total_dates = len(date_range) 
+                logger.info(str(total_dates) + ' dates will be processing')
             except:
                 logger.critical('Invalid arguments')
                 sys.exit()
-            wf = linear_flow.Flow("main-flow")
-            wf.add(
-                getDateRange('get date range'),
-                processDaterangeData('process date-range data')
-            )
-            e = engines.load(wf,store={'start':start,'end':end})
+            flow = unordered_flow.Flow("sub-flow-multiple-dates")
+            store = {}
+            index = 0
+            for date in date_range:
+                index += 1
+                (sub_flow,sub_store) = historical_flow('date' + str(index), date)
+                (flow,store) = update_flow((flow,store), (sub_flow,sub_store))
+            workers = 20 if total_dates>20 else total_dates
+            e = engines.load(flow, store=store, engine='parallel', max_workers=workers)
             runEngine(e)
         else:
             logger.error('Invalid arguments, worker is not generated!')

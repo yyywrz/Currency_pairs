@@ -1,7 +1,9 @@
-import requests
-from info import consts
 import logging as logger
-from info import helper
+
+import requests
+
+from info import consts, helper
+
 
 def fetcher(currency_code):
 # 

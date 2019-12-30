@@ -1,11 +1,12 @@
 import pymongo
 
+
 class db:
 
     def __init__(self,databaseName,collection):
-        client =pymongo.MongoClient('localhost',27017)
+        self.client =pymongo.MongoClient('localhost',27017)
 
-        Database = client[databaseName]
+        Database = self.client[databaseName]
         # name of database
 
         self.collection = Database[collection]
@@ -32,3 +33,9 @@ class db:
     
     def deleteOne(self,key,value):
         self.collection.delete_one({key:value})
+    
+    def __enter__(self):
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.client.close()

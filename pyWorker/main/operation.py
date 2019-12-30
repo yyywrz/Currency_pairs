@@ -1,13 +1,18 @@
 
-import time
-import os
-import logging as logger
 import copy
+import logging as logger
+import os
+import time
 
-from info import consts
-from info import helper
-from util import mongodb_handler
-from util import file_handler
+from info import consts, helper
+from util import file_handler, mongodb_handler
+
+keys = [
+    'Currency Code',
+    'Currency Name',
+    'Region',
+    'date',
+    'rates']
 
 def rate_converter(code,instance):
     base = instance[code]
@@ -26,20 +31,24 @@ def all_rates(data):
     return rate
 
 def to_mongodb(collection,time,instance):
-    try:
-        db = mongodb_handler.db('currency_database',collection)
-        if '_id' in instance:
-            del instance['_id']
-        if not db.getOne('date',time):
-            db.addOne(instance)
-    except:
-        logger.warning('insert ' +collection+' into database failed!')
+    #try:
+    if True:
+        with mongodb_handler.db('currency_database',collection) as db:
+            if not db.getOne('date',time):
+                one = {}
+                for key,value in instance.items():
+                    if key in keys:
+                        one[key] = value           
+                db.addOne(one)
+    #except:
+     #   logger.warning('insert ' +collection+time+' into database failed!')
 
 def to_file(path,code,instance,date=time.strftime("%Y-%m-%d", time.localtime())):
-    try:
+    #try:
+    if True:
         file_handler.outputToFile(code,instance,path,date)  
-    except:
-        logger.warning('insert '+code+date+' data into files failed!',)
+    #except:
+        #logger.warning('insert '+code+date+' data into files failed!',)
 
 def one_date_instance_in_file(code,path,base,date):
     target_path = path+'\\'+date
@@ -65,13 +74,13 @@ def rateInFile(code,path):
     return instance
 
 def rateInDB(collection):
-    db = mongodb_handler.db('currency_database',collection)
-    instance=[]
-    for one_date_instance in db.all():
-        one = copy.deepcopy(one_date_instance)
-        del one['_id']
-        instance.append(one)
-    return instance
+    with mongodb_handler.db('currency_database',collection) as db:
+        instance=[]
+        for one_date_instance in db.all():
+            one = copy.deepcopy(one_date_instance)
+            del one['_id']
+            instance.append(one)
+        return instance
 
 def rebaseData(path,base):
     rate_in_file = {}
@@ -102,8 +111,8 @@ def storeData(rates,path):
 def removeDataInDB(date):
     for code in consts.all_codes:
         try:
-            db = mongodb_handler.db('currency_database',code)
-            db.deleteOne('date',date)
+            with mongodb_handler.db('currency_database',code) as db:
+                db.deleteOne('date',date)
         except:
             logger.error('delete '+date+' in DB failed')
 
@@ -112,10 +121,7 @@ def remove_all(path):
         file_handler.removeDataInFile(date,path)
     for code in consts.all_codes:
         try:
-            db = mongodb_handler.db('currency_database',code)
-            db.removeAll()
+            with mongodb_handler.db('currency_database',code) as db:
+                db.removeAll()
         except:
             logger.error('delete '+code+' in DB failed')
-
-
-

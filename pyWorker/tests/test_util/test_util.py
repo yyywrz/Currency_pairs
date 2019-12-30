@@ -1,6 +1,8 @@
+import os
+
 from util import file_handler as fh
 from util import mongodb_handler as mh
-import os
+
 
 def parent_path():
     current_path = os.path.abspath(__file__)

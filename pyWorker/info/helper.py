@@ -1,6 +1,8 @@
-from info import consts
 import time
 from copy import deepcopy
+
+from info import consts
+
 
 class validate:
 #
@@ -62,5 +64,3 @@ class ref:
             return self.currency_names[name]
         else:
             return 'invalid'
-
-
